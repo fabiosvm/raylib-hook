@@ -1,0 +1,27 @@
+
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Installing Hook
+      run: ${{ github.workspace }}/install-hook.sh
+
+    - name: Installing Raylib
+      run: ${{ github.workspace }}/install-raylib.sh
+
+    - name: Building Raylib-Hook
+      run: |
+        export HOOK_HOME=${{ github.workspace }}/hook-lang
+        ${{ github.workspace }}/build.sh
