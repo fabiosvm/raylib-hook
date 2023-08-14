@@ -1,0 +1,34 @@
+//
+// first_window.hk
+//
+
+import raylib as rl;
+
+let { RAYWHITE, RED, GRAY } = rl.colors;
+let { MOUSE_BUTTON_LEFT } = rl;
+
+let SCREEN_WIDTH = 800;
+let SCREEN_HEIGHT = 600;
+
+rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Detect if mouse button is pressed");
+rl.SetTargetFPS(60);
+
+while (!rl.WindowShouldClose()) {
+  mut touchPosition = rl.NewVector2(-1, -1);
+
+  if (rl.IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    touchPosition = rl.GetMousePosition();
+  }
+
+  rl.BeginDrawing();
+  rl.ClearBackground(RAYWHITE);
+
+  if (rl.Vector2GetX(touchPosition) >= 0 && rl.Vector2GetY(touchPosition) >= 0) {
+    rl.DrawCircleV(touchPosition, 20, RED);
+  }
+
+  rl.DrawText("Touch the screen to draw circles", 10, 10, 20, GRAY);
+  rl.EndDrawing();
+}
+
+rl.CloseWindow();

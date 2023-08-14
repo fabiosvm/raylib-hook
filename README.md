@@ -30,29 +30,19 @@ To install the binding, you can use the `install.sh` script:
 If you installed the binding, you can use it in your Hook scripts like this:
 
 ```js
-import {
-  InitWindow,
-  WindowShouldClose,
-  BeginDrawing,
-  ClearBackground,
-  DrawText,
-  EndDrawing,
-  CloseWindow,
-  RAYWHITE,
-  LIGHTGRAY
-} from raylib;
+import "raylib" as rl;
+let { LIGHTGRAY, RAYWHITE } = rl.colors;
 
-InitWindow(800, 450, "raylib [core] example - basic window");
+rl.InitWindow(800, 450, "raylib [core] example - basic window");
 
-while (!WindowShouldClose())
-{
-  BeginDrawing();
-    ClearBackground(RAYWHITE);
-    DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
-  EndDrawing();
+while (!rl.WindowShouldClose()) {
+  rl.BeginDrawing();
+  rl.ClearBackground(RAYWHITE);
+  rl.DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
+  rl.EndDrawing();
 }
 
-CloseWindow();
+rl.CloseWindow();
 ```
 
 ## Running Examples

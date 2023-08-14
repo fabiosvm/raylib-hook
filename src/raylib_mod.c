@@ -48,6 +48,8 @@ static inline Vector2Userdata *vector2_userdata_new(Vector2 vector);
 static inline ColorUserdata *color_userdata_new(Color color);
 static inline void load_colors(HkState *state);
 static void NewVector2_call(HkState *state, HkValue *args);
+static void Vector2GetX_call(HkState *state, HkValue *args);
+static void Vector2GetY_call(HkState *state, HkValue *args);
 static void InitWindow_call(HkState *state, HkValue *args);
 static void WindowShouldClose_call(HkState *state, HkValue *args);
 static void CloseWindow_call(HkState *state, HkValue *args);
@@ -58,6 +60,9 @@ static void EndDrawing_call(HkState *state, HkValue *args);
 static void DrawText_call(HkState *state, HkValue *args);
 static void GetMonitorPosition_call(HkState *state, HkValue *args);
 static void SetTargetFPS_call(HkState *state, HkValue *args);
+static void IsMouseButtonPressed_call(HkState *state, HkValue *args);
+static void GetMousePosition_call(HkState *state, HkValue *args);
+static void DrawCircleV_call(HkState *state, HkValue *args);
 
 static inline Vector2Userdata *vector2_userdata_new(Vector2 vector)
 {
@@ -201,6 +206,22 @@ static void NewVector2_call(HkState *state, HkValue *args)
     hk_userdata_free(udata);
 }
 
+static void Vector2GetX_call(HkState *state, HkValue *args)
+{
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  Vector2 vector = ((Vector2Userdata *) hk_as_userdata(args[1]))->vector;
+  hk_state_push_number(state, (double) vector.x);
+}
+
+static void Vector2GetY_call(HkState *state, HkValue *args)
+{
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  Vector2 vector = ((Vector2Userdata *) hk_as_userdata(args[1]))->vector;
+  hk_state_push_number(state, (double) vector.y);
+}
+
 static void InitWindow_call(HkState *state, HkValue *args)
 {
   hk_state_check_argument_int(state, args, 1);
@@ -300,6 +321,39 @@ static void SetTargetFPS_call(HkState *state, HkValue *args)
   hk_state_push_nil(state);
 }
 
+static void IsMouseButtonPressed_call(HkState *state, HkValue *args)
+{
+  hk_state_check_argument_int(state, args, 1);
+  hk_return_if_not_ok(state);
+  int button = (int) hk_as_number(args[1]);
+  hk_state_push_bool(state, IsMouseButtonPressed(button));
+}
+
+static void GetMousePosition_call(HkState *state, HkValue *args)
+{
+  (void) args;
+  Vector2 position = GetMousePosition();
+  HkUserdata *udata = (HkUserdata *) vector2_userdata_new(position);
+  hk_state_push_userdata(state, udata);
+  if (!hk_state_is_ok(state))
+    hk_userdata_free(udata);
+}
+
+static void DrawCircleV_call(HkState *state, HkValue *args)
+{
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_number(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_userdata(state, args, 3);
+  hk_return_if_not_ok(state);
+  Vector2 center = ((Vector2Userdata *) hk_as_userdata(args[1]))->vector;
+  float radius = (float) hk_as_number(args[2]);
+  Color color = ((ColorUserdata *) hk_as_userdata(args[3]))->color;
+  DrawCircleV(center, radius, color);
+  hk_state_push_nil(state);
+}
+
 HK_LOAD_MODULE_HANDLER(raylib)
 {
   hk_state_push_string_from_chars(state, -1, "raylib");
@@ -308,9 +362,45 @@ HK_LOAD_MODULE_HANDLER(raylib)
   hk_return_if_not_ok(state);
   load_colors(state);
   hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "MOUSE_BUTTON_LEFT");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, MOUSE_BUTTON_LEFT);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "MOUSE_BUTTON_RIGHT");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, MOUSE_BUTTON_RIGHT);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "MOUSE_BUTTON_MIDDLE");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, MOUSE_BUTTON_MIDDLE);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "MOUSE_BUTTON_SIDE");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, MOUSE_BUTTON_SIDE);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "MOUSE_BUTTON_EXTRA");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, MOUSE_BUTTON_EXTRA);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "MOUSE_BUTTON_FORWARD");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, MOUSE_BUTTON_FORWARD);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "MOUSE_BUTTON_BACK");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, MOUSE_BUTTON_BACK);
+  hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "NewVector2");
   hk_return_if_not_ok(state);
   hk_state_push_new_native(state, "NewVector2", 2, NewVector2_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "Vector2GetX");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "Vector2GetX", 1, Vector2GetX_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "Vector2GetY");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "Vector2GetY", 2, Vector2GetY_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "InitWindow");
   hk_return_if_not_ok(state);
@@ -352,5 +442,17 @@ HK_LOAD_MODULE_HANDLER(raylib)
   hk_return_if_not_ok(state);
   hk_state_push_new_native(state, "SetTargetFPS", 1, SetTargetFPS_call);
   hk_return_if_not_ok(state);
-  hk_state_construct(state, 12);
+  hk_state_push_string_from_chars(state, -1, "IsMouseButtonPressed");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "IsMouseButtonPressed", 1, IsMouseButtonPressed_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "GetMousePosition");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "GetMousePosition", 0, GetMousePosition_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "DrawCircleV");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "DrawCircleV", 3, DrawCircleV_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 24);
 }
